@@ -1,17 +1,17 @@
 // ==UserScript==
-// @name         B站合集总时长统计（by xbxl）
-// @namespace    xbxl.bilibili.duration
-// @version      1.0
-// @description  显示B站合集视频的总时长、已看时长、未看时长（插入到视频信息区域）
-// @author       xbxl
-// @match        *://www.bilibili.com/video/*
+// @name         B站视频学习时长统计
+// @version      1.1
+// @description  B站视频学习时长统计，分P统计，并计算学习百分比
+// @author       yang geng
+// @match        www.bilibili.com/video/*
+// @icon         https://i0.hdslb.com/bfs/static/jinkela/long/images/favicon.ico
 // @grant        none
 // ==/UserScript==
 
 (function () {
   'use strict';
 
-  console.log('[xbxl] 用户脚本，准备启动...');
+  console.log('[miemieGyy] 用户脚本，准备启动...');
 
   let lastUrl = window.location.href;
   let observer;
@@ -53,7 +53,7 @@
     const match = amtElement.textContent.match(/(\d+)\/(\d+)/);
     if (match && match[1] && match[2]) {
       return {
-        count: parseInt(match[1],  // 已看集数
+        count: parseInt(match[1]),  // 已看集数
         total: parseInt(match[2])  // 总集数
       };
     }
@@ -176,6 +176,7 @@
   }
 
   function waitForReady() {
+    debugger;
     const interval = setInterval(() => {
       const list = document.querySelector('.video-pod__list');
       const info = document.querySelector('.video-info-detail-list.video-info-detail-content');
