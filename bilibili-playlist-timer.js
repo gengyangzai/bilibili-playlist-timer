@@ -2,7 +2,7 @@
 // @name         B站视频学习时长统计
 // @version      1.1
 // @description  B站视频学习时长统计，分P统计，并计算学习百分比
-// @author       yang geng
+// @author       miemieyang
 // @match        www.bilibili.com/video/*
 // @icon         https://i0.hdslb.com/bfs/static/jinkela/long/images/favicon.ico
 // @grant        none
@@ -99,6 +99,7 @@
     });
 
     const unwatchedSeconds = totalSeconds - watchedSeconds;
+      const percentage = totalSeconds > 0 ? ((watchedSeconds / totalSeconds) * 100).toFixed(2) : 0;
 
     const result = {
       total: formatSecondsToTime(totalSeconds),
@@ -106,21 +107,22 @@
       unwatched: formatSecondsToTime(unwatchedSeconds),
       progress: watchedCount < totalCount ? 
         `已看 ${watchedCount} 集${currentVideoIndex === watchedCount ? ' (当前集观看中)' : ''}` : 
-        '已看完所有视频'
+        '已看完所有视频',
+    percentage: `${percentage}%`  // 添加百分比字段
     };
 
     console.log('[xbxl] 时长统计结果：', result);
     renderDurationStats(result);
   }
 
-  function renderDurationStats({ total, watched, unwatched, progress }) {
+  function renderDurationStats({ total, watched, unwatched, progress,percentage }) {
     const infoContainer = document.querySelector('.video-info-detail-list.video-info-detail-content');
     if (!infoContainer) {
       console.warn('[xbxl] 未找到插入区域 `.video-info-detail-list.video-info-detail-content`');
       return;
     }
 
-    const statsText = `合集时长：${total} ｜ 已看：${watched} ｜ 未看：${unwatched} ｜ ${progress}`;
+    const statsText = `合集时长：${total} ｜ 已看：${watched} ｜ 未看：${unwatched} ｜进度：${percentage} ${progress}`;
 
     // 若已存在旧元素，更新内容
     let existing = document.querySelector('.xbxl-duration');
