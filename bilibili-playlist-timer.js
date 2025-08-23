@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         B站视频学习时长统计
-// @version      2.1
+// @version      2.2
 // @namespace    https://github.com/gengyangzai/bilibili-playlist-timer
 // @description  B站视频学习时长统计，一共四个维度，合集时长｜已看｜未看｜进度，方便跟进自己的学习进度。支持合集统计，单集统计。
 // @author       miemieyang
@@ -73,7 +73,6 @@
 
         const item3 = document.querySelectorAll('.bpx-player-ctrl-time-label');
 
-        debugger;
         if( items.length) {
             calculateDurationsV1(items,items2)
         }else if(item3.length) {
@@ -163,9 +162,10 @@
     }
 
     function renderDurationStats({total, watched, unwatched, progress, percentage}) {
-        const infoContainer = document.querySelector('.video-info-detail-list.video-info-detail-content');
+        const infoContainer = document.querySelector('.video-info-container');
+        debugger;
         if (!infoContainer) {
-            console.warn('[miemie] 未找到插入区域 `.video-info-detail-list.video-info-detail-content`');
+            console.warn('[miemie] 未找到插入区域 `.video-info-container`');
             return;
         }
 
@@ -195,7 +195,7 @@
             return;
         }
 
-        calculateDurations();
+        calculateDurationsType();
 
         // 如果已有observer，先断开
         if (observer) {
@@ -204,7 +204,7 @@
 
         observer = new MutationObserver(() => {
             console.log('[miemie] 🔁 监听到 DOM 更新，重新计算合集时长');
-            calculateDurations();
+            calculateDurationsType();
         });
 
         observer.observe(listContainer, {
@@ -220,7 +220,7 @@
         if (currentUrl !== lastUrl) {
             console.log('[miemie] 🌐 检测到URL变化，重新计算合集时长');
             lastUrl = currentUrl;
-            calculateDurations();
+            calculateDurationsType();
         }
     }
 
