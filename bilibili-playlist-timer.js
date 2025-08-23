@@ -24,9 +24,11 @@
     }
 
     function formatSecondsToTime(seconds) {
-        const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
-        const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
-        const s = String(seconds % 60).padStart(2, '0');
+        // 如果输入是浮点数，先取整
+        const totalSeconds = Math.floor(seconds);
+        const h = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+        const m = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+        const s = String(totalSeconds % 60).padStart(2, '0');
         return `${h}:${m}:${s}`;
     }
 
@@ -63,6 +65,9 @@
     function calculateDurations() {
         console.log('[miemie] 🧮 正在计算选集时长...');
         const items = document.querySelectorAll('.video-pod__list .video-pod__item');
+
+        const items2 = document.querySelectorAll('.video-pod__list .video-pod__item .simple-base-item');
+
         if (!items.length) {
             console.warn('[miemie] ⚠️ 未找到选集列表，等待下一次重试...');
             return;
@@ -75,12 +80,12 @@
         let currentVideoIndex = -1;
 
         // 先找出当前正在播放的视频索引
-        items.forEach((item, index) => {
+        items2.forEach((item, index) => {
             if (item.classList.contains('active')) {
                 currentVideoIndex = index;
             }
         });
-
+        let  watchedCountNew=(watchedCount-1)
         items.forEach((item, index) => {
             const durationEl = item.querySelector('.stat-item.duration');
             if (!durationEl) return;
@@ -88,13 +93,17 @@
             const videoDuration = parseDurationToSeconds(durationEl.textContent);
             totalSeconds += videoDuration;
 
-            if (index < watchedCount) {
+            console.log(`[miemie] index${index} ,watchedCount${watchedCount},currentVideoIndex ${currentVideoIndex} ,currentProgress:${currentProgress}`);
+            if (index < watchedCountNew) {
                 // 已完整观看的视频
                 watchedSeconds += videoDuration;
-            } else if (index === watchedCount && currentVideoIndex === index && currentProgress) {
+            }
+            else if (index === watchedCountNew && currentVideoIndex === index && currentProgress) {
                 // 当前正在观看的视频（可能是部分观看）
                 const progress = Math.min(currentProgress.current, currentProgress.duration);
+                debugger;
                 watchedSeconds += progress;
+
             }
         });
 
@@ -106,7 +115,7 @@
             watched: formatSecondsToTime(watchedSeconds),
             unwatched: formatSecondsToTime(unwatchedSeconds),
             progress: watchedCount < totalCount ?
-                `已看 ${watchedCount} 集${currentVideoIndex === watchedCount ? ' (当前集观看中)' : ''}` :
+                `已看 ${watchedCountNew} 集${currentVideoIndex === watchedCountNew ? ' (当前集观看中)' : ''}` :
                 '已看完所有视频',
             percentage: `${percentage}%`  // 添加百分比字段
         };
