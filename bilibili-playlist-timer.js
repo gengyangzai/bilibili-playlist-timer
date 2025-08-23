@@ -1,10 +1,14 @@
 // ==UserScript==
 // @name         B站视频学习时长统计
 // @version      1.1
-// @description  B站视频学习时长统计，分P统计，并计算学习百分比
+// @namespace    https://github.com/gengyangzai/bilibili-playlist-timer
+// @description  B站视频学习时长统计，一共四个维度，合集时长｜已看｜未看｜进度，方便跟进自己的学习进度。
 // @author       miemieyang
 // @match        www.bilibili.com/video/*
 // @icon         https://i0.hdslb.com/bfs/static/jinkela/long/images/favicon.ico
+// @compatible   chrome
+// @license MIT
+// 源代码地址: https://github.com/xbxl/bilibili-playlist-timer
 // @grant        none
 // ==/UserScript==
 
