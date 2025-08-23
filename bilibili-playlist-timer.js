@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         B站视频学习时长统计
-// @version      1.1
+// @version      2.1
 // @namespace    https://github.com/gengyangzai/bilibili-playlist-timer
-// @description  B站视频学习时长统计，一共四个维度，合集时长｜已看｜未看｜进度，方便跟进自己的学习进度。
+// @description  B站视频学习时长统计，一共四个维度，合集时长｜已看｜未看｜进度，方便跟进自己的学习进度。支持合集统计，单集统计。
 // @author       miemieyang
 // @match        www.bilibili.com/video/*
 // @icon         https://i0.hdslb.com/bfs/static/jinkela/long/images/favicon.ico
@@ -66,17 +66,25 @@
         return {count: 0, total: 0};
     }
 
-    function calculateDurations() {
+    function calculateDurationsType() {
         console.log('[miemie] 🧮 正在计算选集时长...');
         const items = document.querySelectorAll('.video-pod__list .video-pod__item');
-
         const items2 = document.querySelectorAll('.video-pod__list .video-pod__item .simple-base-item');
 
-        if (!items.length) {
+        const item3 = document.querySelectorAll('.bpx-player-ctrl-time-label');
+
+        debugger;
+        if( items.length) {
+            calculateDurationsV1(items,items2)
+        }else if(item3.length) {
+            calculateDurationsV2(item3)
+        }else {
             console.warn('[miemie] ⚠️ 未找到选集列表，等待下一次重试...');
             return;
         }
 
+    }
+    function calculateDurationsV1(items,items2) {
         let totalSeconds = 0;
         let watchedSeconds = 0;
         const {count: watchedCount, total: totalCount} = getWatchedInfo();
@@ -121,6 +129,32 @@
             progress: watchedCount < totalCount ?
                 `已看 ${watchedCountNew} 集${currentVideoIndex === watchedCountNew ? ' (当前集观看中)' : ''}` :
                 '已看完所有视频',
+            percentage: `${percentage}%`  // 添加百分比字段
+        };
+
+        console.log('[miemie] 时长统计结果：', result);
+        renderDurationStats(result);
+    }
+    function calculateDurationsV2(item3) {
+        let totalSeconds = 0; // 总看时长
+        let watchedSeconds = 0;  // 已看时长
+
+        item3.forEach((item, index) => {
+            const currentDurationTime = item.querySelector('.bpx-player-ctrl-time-current').innerText;
+            const totalDurationTime = item.querySelector('.bpx-player-ctrl-time-duration').innerText;
+
+            totalSeconds = parseDurationToSeconds(totalDurationTime);
+            watchedSeconds = parseDurationToSeconds(currentDurationTime);
+        })
+
+        const unwatchedSeconds = totalSeconds - watchedSeconds;
+        const percentage = totalSeconds > 0 ? ((watchedSeconds / totalSeconds) * 100).toFixed(2) : 0;
+
+        const result = {
+            total: formatSecondsToTime(totalSeconds),
+            watched: formatSecondsToTime(watchedSeconds),
+            unwatched: formatSecondsToTime(unwatchedSeconds),
+            progress: '',
             percentage: `${percentage}%`  // 添加百分比字段
         };
 
@@ -192,10 +226,12 @@
 
     function waitForReady() {
         const interval = setInterval(() => {
-            const list = document.querySelector('.video-pod__list');
+            const list1 = document.querySelector('.video-pod__list');
+            const list2 = document.querySelector('.bpx-player-ctrl-time-label');
+
             const info = document.querySelector('.video-info-detail-list.video-info-detail-content');
 
-            if (list && info) {
+            if ((list1||list2) && info) {
                 console.log('[miemie] 页面结构已准备，开始监听...');
                 clearInterval(interval);
                 initObserver();
@@ -204,7 +240,7 @@
                 setInterval(checkUrlChange, 1000);
 
                 // 添加视频进度监听（每5秒检查一次）
-                setInterval(calculateDurations, 5000);
+                setInterval(calculateDurationsType, 5000);
             }
         }, 2000);
     }
